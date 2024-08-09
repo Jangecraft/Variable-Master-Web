@@ -4,12 +4,21 @@ import { generatePromptedFloat } from './promptedFloat.js';
 document.addEventListener("DOMContentLoaded", function () {
     const generateBtn = document.getElementById("generate-btn");
     const answerBtn = document.getElementById("answer-btn");
+    const correctBtn = document.getElementById("correct-btn");
+    const incorrectBtn = document.getElementById("incorrect-btn");
+    const resetBtn = document.getElementById("reset-btn");
     const resultDiv = document.getElementById("result");
     const answerDiv = document.getElementById("answer");
     const modeSelect = document.getElementById("mode-select");
+    const totalQuestionsEl = document.getElementById("total-questions");
+    const correctAnswersEl = document.getElementById("correct-answers");
+    const incorrectAnswersEl = document.getElementById("incorrect-answers");
 
     let randomValue = null;
     let valueType = null;
+    let totalQuestions = 0;
+    let correctAnswers = 0;
+    let incorrectAnswers = 0;
 
     function generateRandomString(length) {
         let result = '';
@@ -26,6 +35,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         return result;
+    }
+
+    function resetGame() {
+        totalQuestions = 0;
+        correctAnswers = 0;
+        incorrectAnswers = 0;
+        totalQuestionsEl.textContent = "Total: " + totalQuestions;
+        correctAnswersEl.textContent = "Correct: " + correctAnswers;
+        incorrectAnswersEl.textContent = "Incorrect: " + incorrectAnswers;
+        resultDiv.textContent = "???";
+        answerDiv.textContent = "???";
     }
 
     generateBtn.addEventListener("click", () => {
@@ -71,6 +91,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 break;
         }
 
+        totalQuestions++;
+        totalQuestionsEl.textContent = "Total: " + totalQuestions;
         resultDiv.textContent = `${randomValue}`;
         answerDiv.textContent = "???";
     });
@@ -99,5 +121,23 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             answerDiv.textContent = "Please generate a value first.";
         }
+    });
+
+    correctBtn.addEventListener("click", () => {
+        if (randomValue !== null) {
+            correctAnswers++;
+            correctAnswersEl.textContent = "Correct: " + correctAnswers;
+        }
+    });
+
+    incorrectBtn.addEventListener("click", () => {
+        if (randomValue !== null) {
+            incorrectAnswers++;
+            incorrectAnswersEl.textContent = "Incorrect: " + incorrectAnswers;
+        }
+    });
+
+    resetBtn.addEventListener("click", () => {
+        resetGame();
     });
 });
