@@ -2,11 +2,11 @@ import { generatePromptedInt } from "./promptedInt.js";
 import { generatePromptedFloat } from "./promptedFloat.js";
 
 function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function getRandomFloat(min, max, decimal_places) {
-    return ((Math.random() * (max - min + 1)) + min).toFixed(decimal_places);
+  return (Math.random() * (max - min + 1) + min).toFixed(decimal_places);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -108,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
     totalQuestionsEl.textContent = "Total: " + totalQuestions;
     resultDiv.textContent = `${randomValue}`;
     answerDiv.textContent = "???";
+    updateProgressBar();
   });
 
   answerBtn.addEventListener("click", () => {
@@ -166,13 +167,30 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function updateProgressBar() {
-    const totalAnswered = correctAnswers + incorrectAnswers;
+    let withoutAnswers = totalQuestions - (correctAnswers+incorrectAnswers)
     const correctPercentage =
-      totalAnswered > 0 ? (correctAnswers / totalAnswered) * 100 : 0;
-    const progressBar = document.getElementById("progress-bar");
+      totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+    const incorrectPercentage =
+      totalQuestions > 0 ? (incorrectAnswers / totalQuestions) * 100 : 0;
+    const withoutPercentage =
+        totalQuestions > 0 ? (withoutAnswers / totalQuestions) * 100 : 0;
 
-    progressBar.style.width = `${correctPercentage}%`;
-    progressBar.setAttribute("aria-valuenow", correctPercentage);
-    progressBar.textContent = `${correctPercentage.toFixed(2)}%`;
+    const correctProgressBar = document.getElementById("correct-progress-bar");
+    const incorrectProgressBar = document.getElementById(
+      "incorrect-progress-bar"
+    );
+    const withoutProgressBar = document.getElementById("without-progress-bar");
+
+    correctProgressBar.style.width = correctPercentage + "%";
+    correctProgressBar.setAttribute("aria-valuenow", correctPercentage);
+    correctProgressBar.textContent = Math.round(correctPercentage) + "%";
+
+    incorrectProgressBar.style.width = incorrectPercentage + "%";
+    incorrectProgressBar.setAttribute("aria-valuenow", incorrectPercentage);
+    incorrectProgressBar.textContent = Math.round(incorrectPercentage) + "%";
+
+    withoutProgressBar.style.width = withoutPercentage + "%";
+    withoutProgressBar.setAttribute("aria-valuenow", withoutPercentage);
+    withoutProgressBar.textContent = Math.round(withoutPercentage) + "%";
   }
 });
