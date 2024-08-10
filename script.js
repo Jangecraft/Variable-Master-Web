@@ -5,8 +5,8 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getRandomFloat(min, max, decimal_places) {
-  return (Math.random() * (max - min + 1) + min).toFixed(decimal_places);
+function getRandomFloat(min, max, decimalPlaces) {
+  return (Math.random() * (max - min + 1) + min).toFixed(decimalPlaces);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -21,12 +21,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const totalQuestionsEl = document.getElementById("total-questions");
   const correctAnswersEl = document.getElementById("correct-answers");
   const incorrectAnswersEl = document.getElementById("incorrect-answers");
+  const skipAnswersEl = document.getElementById("skip-answers");
 
   let randomValue = null;
   let valueType = null;
   let totalQuestions = 0;
   let correctAnswers = 0;
   let incorrectAnswers = 0;
+  let skipAnswers = 0;
+  let allowedCount = false;
 
   function generateRandomString(length) {
     let result = "";
@@ -52,14 +55,18 @@ document.addEventListener("DOMContentLoaded", function () {
     totalQuestions = 0;
     correctAnswers = 0;
     incorrectAnswers = 0;
+    skipAnswers = 0;
     totalQuestionsEl.textContent = "Total: " + totalQuestions;
     correctAnswersEl.textContent = "Correct: " + correctAnswers;
     incorrectAnswersEl.textContent = "Incorrect: " + incorrectAnswers;
+    skipAnswersEl.textContent = "Skip: " + skipAnswers;
     resultDiv.textContent = "???";
     answerDiv.textContent = "???";
   }
 
   generateBtn.addEventListener("click", () => {
+    skipAnswersEl.textContent = "Skip: " + skipAnswers;
+
     const mode = modeSelect.value;
     let randomType;
 
@@ -134,28 +141,29 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
       }
       answerDiv.textContent = answerText;
+      allowedCount = true;
     } else {
       answerDiv.textContent = "Please generate a value first.";
     }
   });
 
   correctBtn.addEventListener("click", () => {
-    const totalAnswered = correctAnswers + incorrectAnswers;
-    if (totalAnswered < totalQuestions) {
+    if (allowedCount) {
       if (randomValue !== null) {
         correctAnswers++;
         correctAnswersEl.textContent = "Correct: " + correctAnswers;
+        allowedCount = false;
         updateProgressBar();
       }
     }
   });
 
   incorrectBtn.addEventListener("click", () => {
-    const totalAnswered = correctAnswers + incorrectAnswers;
-    if (totalAnswered < totalQuestions) {
+    if (allowedCount) {
       if (randomValue !== null) {
         incorrectAnswers++;
         incorrectAnswersEl.textContent = "Incorrect: " + incorrectAnswers;
+        allowedCount = false;
         updateProgressBar();
       }
     }
@@ -167,13 +175,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function updateProgressBar() {
-    let withoutAnswers = totalQuestions - (correctAnswers+incorrectAnswers)
+    skipAnswers = totalQuestions - (correctAnswers+incorrectAnswers)
     const correctPercentage =
       totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
     const incorrectPercentage =
       totalQuestions > 0 ? (incorrectAnswers / totalQuestions) * 100 : 0;
     const withoutPercentage =
-        totalQuestions > 0 ? (withoutAnswers / totalQuestions) * 100 : 0;
+        totalQuestions > 0 ? (skipAnswers / totalQuestions) * 100 : 0;
 
     const correctProgressBar = document.getElementById("correct-progress-bar");
     const incorrectProgressBar = document.getElementById(
