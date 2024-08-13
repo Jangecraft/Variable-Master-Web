@@ -98,11 +98,11 @@ document.addEventListener("DOMContentLoaded", function () {
         valueType = "float";
         break;
       case "char":
-        randomValue = String.fromCharCode(getRandomInt(65, 90));
+        randomValue = "'" + String.fromCharCode(getRandomInt(65, 90)) + "'";
         valueType = "char";
         break;
       case "string":
-        randomValue = generateRandomString(10);
+        randomValue = "\"" + generateRandomString(10) + "\"";
         valueType = "string";
         break;
       case "bool":
