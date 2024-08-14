@@ -1,13 +1,8 @@
 import { generatePromptedInt } from "./promptedInt.js";
 import { generatePromptedFloat } from "./promptedFloat.js";
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getRandomFloat(min, max, decimalPlaces) {
-  return (Math.random() * (max - min + 1) + min).toFixed(decimalPlaces);
-}
+import { generatePromptedString } from "./promptedString.js";
+import { generatePromptedBool } from "./promptedBool.js";
+import { getRandomInt, getRandomFloat} from "./random.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   const generateBtn = document.getElementById("generate-btn");
@@ -78,11 +73,16 @@ document.addEventListener("DOMContentLoaded", function () {
       randomType = ["integer", "float", "char", "string", "bool"][
         Math.floor(Math.random() * 5)
       ];
+    } else if (mode === "master") {
+      randomType = ["integer", "float", "char", "string", "bool"][
+        Math.floor(Math.random() * 5)
+      ];
     }
 
+    let usd_prompt = getRandomInt(1, 100);
     switch (randomType) {
       case "integer":
-        if (mode === "intermediate") {
+        if ((mode === "intermediate" || mode === "master") && usd_prompt >= 50) {
           randomValue = generatePromptedInt();
         } else {
           randomValue = getRandomInt(-32768, 32767);
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
         valueType = "int";
         break;
       case "float":
-        if (mode === "intermediate") {
+        if ((mode === "intermediate" || mode === "master") && usd_prompt >= 50) {
           randomValue = generatePromptedFloat();
         } else {
           randomValue = getRandomFloat(-32768, 32767, 6);
@@ -102,18 +102,31 @@ document.addEventListener("DOMContentLoaded", function () {
         valueType = "char";
         break;
       case "string":
-        randomValue = "\"" + generateRandomString(10) + "\"";
+        if (mode === "master" && usd_prompt >= 50) {
+          randomValue = generatePromptedString();
+        } else {
+          randomValue = "\"" + generateRandomString(10) + "\"";
+        }
         valueType = "string";
         break;
       case "bool":
-        randomValue = Math.random() < 0.5;
+        if (mode === "master" && usd_prompt >= 50) {
+          randomValue = generatePromptedBool();
+        } else {
+          randomValue = Math.random() < 0.5;
+          randomValue = [randomValue, randomValue]
+        }
         valueType = "bool";
         break;
     }
 
     totalQuestions++;
     totalQuestionsEl.textContent = "Total: " + totalQuestions;
-    resultDiv.textContent = `${randomValue}`;
+    if (valueType === "bool"){
+      resultDiv.textContent = `${randomValue[0]}`;
+    } else{
+      resultDiv.textContent = `${randomValue}`;
+    }
     answerDiv.textContent = "???";
     updateProgressBar();
   });
@@ -136,8 +149,8 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         case "bool":
           answerText = `Type: bool/int, Format: %d (${
-            randomValue ? "true" : "false"
-          }, ${randomValue ? 1 : 0})`;
+            randomValue[1] ? "true" : "false"
+          }, ${randomValue[1] ? 1 : 0})`;
           break;
       }
       answerDiv.textContent = answerText;
