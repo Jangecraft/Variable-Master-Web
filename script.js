@@ -214,4 +214,11 @@ document.addEventListener("DOMContentLoaded", function () {
     withoutProgressBar.setAttribute("aria-valuenow", withoutPercentage);
     withoutProgressBar.textContent = Math.round(withoutPercentage) + "%";
   }
+
+  function changeModeSelect() {
+    resetGame();
+    generateQuestion();
+  }
+
+  modeSelect.addEventListener("change", changeModeSelect);
 });
