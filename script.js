@@ -2,21 +2,20 @@ import { generatePromptedInt } from "./promptedInt.js";
 import { generatePromptedFloat } from "./promptedFloat.js";
 import { generatePromptedString } from "./promptedString.js";
 import { generatePromptedBool } from "./promptedBool.js";
-import { getRandomInt, getRandomFloat} from "./random.js";
+import { getRandomInt, getRandomFloat } from "./random.js";
 
 document.addEventListener("DOMContentLoaded", function () {
-  const generateBtn = document.getElementById("generate-btn");
-  const answerBtn = document.getElementById("answer-btn");
-  const correctBtn = document.getElementById("correct-btn");
-  const incorrectBtn = document.getElementById("incorrect-btn");
+  const answerZone = document.getElementById("answer-zone");
   const resetBtn = document.getElementById("reset-btn");
   const resultDiv = document.getElementById("result");
-  const answerDiv = document.getElementById("answer");
   const modeSelect = document.getElementById("mode-select");
   const totalQuestionsEl = document.getElementById("total-questions");
   const correctAnswersEl = document.getElementById("correct-answers");
   const incorrectAnswersEl = document.getElementById("incorrect-answers");
-  const skipAnswersEl = document.getElementById("skip-answers");
+
+  // เมื่อหน้าเว็บโหลดขึ้นมา ให้ปุ่ม Reset มีชื่อว่า "Start"
+  resetBtn.innerHTML = '<i class="fas fa-random"></i> Start';
+  resetBtn.className = "container-fluid btn btn-success btn-lg";
 
   let randomValue = null;
   let valueType = null;
@@ -24,7 +23,14 @@ document.addEventListener("DOMContentLoaded", function () {
   let correctAnswers = 0;
   let incorrectAnswers = 0;
   let skipAnswers = 0;
-  let allowedCount = false;
+
+  // จำนวนปุ่มทั้งหมดในเว็บ
+  let buttonCount = 0;
+
+  // ตรวจสอบว่าเกมหยุดอยู่หรือไม่
+  let stopGame = false;
+
+  generateButtons();
 
   function generateRandomString(length) {
     let result = "";
@@ -54,13 +60,115 @@ document.addEventListener("DOMContentLoaded", function () {
     totalQuestionsEl.textContent = "Total: " + totalQuestions;
     correctAnswersEl.textContent = "Correct: " + correctAnswers;
     incorrectAnswersEl.textContent = "Incorrect: " + incorrectAnswers;
-    skipAnswersEl.textContent = "Skip: " + skipAnswers;
     resultDiv.textContent = "???";
-    answerDiv.textContent = "???";
   }
 
-  generateBtn.addEventListener("click", () => {
-    skipAnswersEl.textContent = "Skip: " + skipAnswers;
+  function generateAnswer() {
+    let id_trueBtn;
+    switch (valueType) {
+      case "int":
+        id_trueBtn = 0;
+        break;
+      case "float":
+        id_trueBtn = 1;
+        break;
+      case "char":
+        id_trueBtn = 2;
+        break;
+      case "string":
+        id_trueBtn = 3;
+        break;
+      case "bool":
+        if (randomValue[1]) {
+          id_trueBtn = 4;
+        } else {
+          id_trueBtn = 5;
+        }
+        break;
+    }
+
+    return id_trueBtn;
+  }
+
+  function checkAnswer(i) {
+    let Answer = false;
+    // ตรวจสอบว่าคำตอบถูกหรือไม่
+    if (i == generateAnswer()) {
+      correctAnswers++;
+      Answer = true;
+    } else {
+      incorrectAnswers++;
+      Answer = false;
+    }
+    const trueBtn = document.getElementById(`box-${generateAnswer()}`);
+    trueBtn.className = "btn btn-success btn-lg";
+
+    updateProgressBar();
+    return Answer;
+  }
+
+  function generateButtons() {
+    const mode = modeSelect.value;
+    answerZone.innerHTML = ""; // ล้างปุ่มเก่า
+
+    // reset ค่าปุ่มเดิม
+    buttonCount = 0;
+    if (mode === "basic" || mode === "intermediate") {
+      buttonCount = 3;
+    } else {
+      buttonCount = 6;
+    }
+
+    const nameBtn = [
+      "Type: int, Format: %d",
+      "Type: float, Format: %f",
+      "Type: char, Format: %c",
+      "Type: string, Format: %s",
+      "Type: bool/int, Format: %d (true, 1)",
+      "Type: bool/int, Format: %d (false, 0)",
+    ];
+
+    const btnContainer = document.createElement("div");
+    btnContainer.className = "btn-container"; // เพิ่มคลาสสำหรับการจัดการ layout ของปุ่ม
+    answerZone.appendChild(btnContainer);
+
+    for (let i = 0; i < buttonCount; i++) {
+      // สร้างปุ่ม
+      const button = document.createElement("button");
+      button.id = `box-${i}`;
+      button.className = "btn btn-dark btn-lg";
+      button.textContent = `${nameBtn[i]}`;
+
+      // เพิ่มปุ่มเข้าไปใน container
+      btnContainer.appendChild(button);
+
+      // ผูก Event Listener กับปุ่มหลังจากที่ปุ่มถูกสร้างแล้ว
+      button.addEventListener("click", () => {
+        if (!stopGame) {
+          if (totalQuestions > 0) {
+            // สั่งหยุดเกมชั่วคราวเมื่อกดปุ่ม
+            stopGame = true;
+            // เปลี่ยนชื่อปุ่มเป็นปุ่ม Next ชั่วคราว
+            resetBtn.innerHTML = '<i class="fa-solid fa-forward"></i> Next';
+            resetBtn.className = "container-fluid btn btn-warning btn-lg";
+            // ตรวจสอบคำตอบ
+            if (!checkAnswer(i)) {
+              button.className = "btn btn-danger btn-lg";
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function generateQuestion() {
+    // สั่งให้เกมดำเนินการต่อเมื่อมีคำถามใหม่
+    stopGame = false;
+    // เปลี่ยนชื่อปุ่มคืนเป็น Reset
+    resetBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Reset';
+    resetBtn.className = "container-fluid btn btn-secondary btn-lg";
+
+    generateButtons();
 
     const mode = modeSelect.value;
     let randomType;
@@ -82,7 +190,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let usd_prompt = getRandomInt(1, 100);
     switch (randomType) {
       case "integer":
-        if ((mode === "intermediate" || mode === "master") && usd_prompt >= 50) {
+        if (
+          (mode === "intermediate" || mode === "master") &&
+          usd_prompt >= 50
+        ) {
           randomValue = generatePromptedInt();
         } else {
           randomValue = getRandomInt(-32768, 32767);
@@ -90,7 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
         valueType = "int";
         break;
       case "float":
-        if ((mode === "intermediate" || mode === "master") && usd_prompt >= 50) {
+        if (
+          (mode === "intermediate" || mode === "master") &&
+          usd_prompt >= 50
+        ) {
           randomValue = generatePromptedFloat();
         } else {
           randomValue = getRandomFloat(-32768, 32767, 6);
@@ -105,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (mode === "master" && usd_prompt >= 50) {
           randomValue = generatePromptedString();
         } else {
-          randomValue = "\"" + generateRandomString(10) + "\"";
+          randomValue = '"' + generateRandomString(10) + '"';
         }
         valueType = "string";
         break;
@@ -114,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
           randomValue = generatePromptedBool();
         } else {
           randomValue = Math.random() < 0.5;
-          randomValue = [randomValue, randomValue]
+          randomValue = [randomValue, randomValue];
         }
         valueType = "bool";
         break;
@@ -122,85 +236,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
     totalQuestions++;
     totalQuestionsEl.textContent = "Total: " + totalQuestions;
-    if (valueType === "bool"){
+    if (valueType === "bool") {
       resultDiv.textContent = `${randomValue[0]}`;
-    } else{
+    } else {
       resultDiv.textContent = `${randomValue}`;
     }
-    answerDiv.textContent = "???";
     updateProgressBar();
-  });
-
-  answerBtn.addEventListener("click", () => {
-    if (randomValue !== null && valueType !== null) {
-      let answerText;
-      switch (valueType) {
-        case "int":
-          answerText = "Type: int, Format: %d";
-          break;
-        case "float":
-          answerText = "Type: float, Format: %f";
-          break;
-        case "char":
-          answerText = "Type: char, Format: %c";
-          break;
-        case "string":
-          answerText = "Type: string, Format: %s";
-          break;
-        case "bool":
-          answerText = `Type: bool/int, Format: %d (${
-            randomValue[1] ? "true" : "false"
-          }, ${randomValue[1] ? 1 : 0})`;
-          break;
-      }
-      answerDiv.textContent = answerText;
-      allowedCount = true;
-    } else {
-      answerDiv.textContent = "Please generate a value first.";
-    }
-  });
-
-  correctBtn.addEventListener("click", () => {
-    if (allowedCount) {
-      if (randomValue !== null) {
-        correctAnswers++;
-        correctAnswersEl.textContent = "Correct: " + correctAnswers;
-        allowedCount = false;
-        updateProgressBar();
-      }
-    }
-  });
-
-  incorrectBtn.addEventListener("click", () => {
-    if (allowedCount) {
-      if (randomValue !== null) {
-        incorrectAnswers++;
-        incorrectAnswersEl.textContent = "Incorrect: " + incorrectAnswers;
-        allowedCount = false;
-        updateProgressBar();
-      }
-    }
-  });
+  }
 
   resetBtn.addEventListener("click", () => {
-    resetGame();
+    if (!stopGame) {
+      // reset คะแนนกลับเป็นค่าเริ่มต้น
+      resetGame();
+    }
+    // สุ่มคำถามขึ้นมาใหม่
+    generateQuestion();
     updateProgressBar();
   });
 
   function updateProgressBar() {
-    skipAnswers = totalQuestions - (correctAnswers+incorrectAnswers)
+    correctAnswersEl.textContent = `Correct: ${correctAnswers}`;
+    incorrectAnswersEl.textContent = `Incorrect: ${incorrectAnswers}`;
+
+    let total_questions = correctAnswers + incorrectAnswers;
     const correctPercentage =
-      totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+      totalQuestions > 0 ? (correctAnswers / total_questions) * 100 : 0;
     const incorrectPercentage =
-      totalQuestions > 0 ? (incorrectAnswers / totalQuestions) * 100 : 0;
-    const withoutPercentage =
-        totalQuestions > 0 ? (skipAnswers / totalQuestions) * 100 : 0;
+      total_questions > 0 ? (incorrectAnswers / total_questions) * 100 : 0;
 
     const correctProgressBar = document.getElementById("correct-progress-bar");
     const incorrectProgressBar = document.getElementById(
       "incorrect-progress-bar"
     );
-    const withoutProgressBar = document.getElementById("without-progress-bar");
 
     correctProgressBar.style.width = correctPercentage + "%";
     correctProgressBar.setAttribute("aria-valuenow", correctPercentage);
@@ -209,10 +276,6 @@ document.addEventListener("DOMContentLoaded", function () {
     incorrectProgressBar.style.width = incorrectPercentage + "%";
     incorrectProgressBar.setAttribute("aria-valuenow", incorrectPercentage);
     incorrectProgressBar.textContent = Math.round(incorrectPercentage) + "%";
-
-    withoutProgressBar.style.width = withoutPercentage + "%";
-    withoutProgressBar.setAttribute("aria-valuenow", withoutPercentage);
-    withoutProgressBar.textContent = Math.round(withoutPercentage) + "%";
   }
 
   function changeModeSelect() {

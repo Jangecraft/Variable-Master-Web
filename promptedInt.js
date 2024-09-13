@@ -19,7 +19,7 @@ export function generatePromptedInt() {
         { prompt: "จำนวนห้องในบ้าน: ", value: getRandomInt(1, 10) + " ห้อง" },
         { prompt: "จำนวนอาหารที่กินในมื้อหนึ่ง: ", value: getRandomInt(1, 10) + " จาน" },
         { prompt: "จำนวนบทเพลงที่ฟังในวันหนึ่ง: ", value: getRandomInt(1, 20) + " เพลง" },
-        { prompt: "จำนวนรูปภาพที่ถ่ายในทริปหนึ่ง: ", value: MgetRandomInt(1, 200) + " รูป" },
+        { prompt: "จำนวนรูปภาพที่ถ่ายในทริปหนึ่ง: ", value: getRandomInt(1, 200) + " รูป" },
         { prompt: "จำนวนชั่วโมงที่นอนต่อคืน: ", value: getRandomInt(0, 12) + " ชั่วโมง" },
         { prompt: "จำนวนครั้งที่ออกกำลังกายในสัปดาห์: ", value: getRandomInt(0, 7) + " ครั้ง" }
     ];
